@@ -34,13 +34,16 @@ include = ["cybershield*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-v --tb=short"
+addopts = "-v --tb=short --cov=cybershield --cov-report=term-missing --cov-report=xml"
 
 [tool.ruff]
 target-version = "py311"
 line-length = 88
+exclude = [".venv", "build", "dist"]
+
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]
 
 [tool.black]
 target-version = ["py311"]
