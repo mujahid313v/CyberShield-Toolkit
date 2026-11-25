@@ -112,3 +112,6 @@ def auth_otp_verify(
 ) -> None:
     """Verify a TOTP code."""
     typer.echo(f"[auth] Verifying OTP: {code}")
+
+if __name__ == "__main__":
+    app()
