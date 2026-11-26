@@ -5,6 +5,7 @@ from typing import Annotated
 import typer
 
 from cybershield import __version__
+from cybershield.password_checker import check_password_strength
 
 app = typer.Typer(
     name="cybershield",
@@ -34,10 +35,24 @@ def main(
 
 @app.command()
 def password(
-    text: Annotated[str, typer.Argument(help="Password to evaluate.")],
+    text: Annotated[
+        str | None,
+        typer.Argument(
+            help="Password to evaluate (optional, prompts securely if omitted)."
+        ),
+    ] = None,
 ) -> None:
     """Check the strength of a password."""
-    typer.echo(f"[password-checker] Checking: {text}")
+    if not text:
+        text = typer.prompt("Enter password to evaluate", hide_input=True)
+
+    result = check_password_strength(text)
+    typer.echo("\n[Password Strength Analysis]")
+    typer.echo(f"  Score:      {result['score']}/100")
+    typer.echo(f"  Strength:   {result['strength']}")
+    typer.echo("  Suggestions:")
+    for suggestion in result["suggestions"]:
+        typer.echo(f"    - {suggestion}")
 
 
 @app.command()
