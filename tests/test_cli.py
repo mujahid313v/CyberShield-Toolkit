@@ -26,3 +26,13 @@ def test_subcommand_helps():
         result = runner.invoke(app, [cmd, "--help"])
         assert result.exit_code == 0
         assert "Usage:" in result.output
+
+
+def test_password_cli():
+    result = runner.invoke(app, ["password", "P@ssw0rd123!Secure"])
+    assert result.exit_code == 0
+    assert "Score:" in result.output
+    assert "Strength:" in result.output
+    assert (
+        "P@ssw0rd123!Secure" not in result.output
+    )  # Ensure password is not echoed back
