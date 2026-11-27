@@ -5,6 +5,7 @@ from typing import Annotated
 import typer
 
 from cybershield import __version__
+from cybershield.caesar import caesar_brute_force, caesar_decrypt, caesar_encrypt
 from cybershield.password_checker import check_password_strength
 
 app = typer.Typer(
@@ -58,7 +59,9 @@ def password(
 @app.command()
 def caesar(
     text: Annotated[str, typer.Argument(help="Text to process.")],
-    shift: Annotated[int, typer.Option(help="Shift value (1-25).")] = 3,
+    shift: Annotated[
+        int, typer.Option("--shift", "-s", help="Shift value (1-25).")
+    ] = 3,
     decrypt: Annotated[
         bool, typer.Option("--decrypt", "-d", help="Decrypt mode.")
     ] = False,
@@ -66,9 +69,21 @@ def caesar(
         bool, typer.Option("--brute", "-b", help="Brute-force all shifts.")
     ] = False,
 ) -> None:
-    """Encrypt, decrypt, or brute-force a Caesar cipher."""
-    mode = "brute-force" if brute else ("decrypt" if decrypt else "encrypt")
-    typer.echo(f"[caesar] {mode}: {text} (shift={shift})")
+    """Encrypt, decrypt, or brute-force a Caesar cipher (Educational)."""
+    typer.echo("[Notice] Caesar cipher is an educational tool for demonstration.")
+    if brute:
+        typer.echo(f"\n[Caesar Brute-Force Demo] Text: '{text}'\n")
+        results = caesar_brute_force(text)
+        for s, decoded in results.items():
+            typer.echo(f"  Shift {s:2d}: {decoded}")
+    elif decrypt:
+        res = caesar_decrypt(text, shift)
+        typer.echo(f"\n[Caesar Decryption] (shift={shift})")
+        typer.echo(f"  Result: {res}")
+    else:
+        res = caesar_encrypt(text, shift)
+        typer.echo(f"\n[Caesar Encryption] (shift={shift})")
+        typer.echo(f"  Result: {res}")
 
 
 @app.command()

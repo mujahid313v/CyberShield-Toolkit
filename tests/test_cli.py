@@ -36,3 +36,17 @@ def test_password_cli():
     assert (
         "P@ssw0rd123!Secure" not in result.output
     )  # Ensure password is not echoed back
+
+
+def test_caesar_cli():
+    result = runner.invoke(app, ["caesar", "abc", "--shift", "1"])
+    assert result.exit_code == 0
+    assert "bcd" in result.output
+
+    result_dec = runner.invoke(app, ["caesar", "bcd", "--shift", "1", "--decrypt"])
+    assert result_dec.exit_code == 0
+    assert "abc" in result_dec.output
+
+    result_brute = runner.invoke(app, ["caesar", "abc", "--brute"])
+    assert result_brute.exit_code == 0
+    assert "Shift" in result_brute.output
