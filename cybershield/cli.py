@@ -70,9 +70,7 @@ def caesar(
     ] = False,
 ) -> None:
     """Encrypt, decrypt, or brute-force a Caesar cipher (Educational)."""
-    typer.echo(
-        "[Notice] Caesar cipher is an educational educational tool for demonstration."
-    )
+    typer.echo("[Notice] Caesar cipher is an educational tool for demonstration.")
     if brute:
         typer.echo(f"\n[Caesar Brute-Force Demo] Text: '{text}'\n")
         results = caesar_brute_force(text)
