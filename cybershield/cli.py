@@ -129,11 +129,9 @@ def integrity(
                 typer.echo("\nStatus: OK — All files match baseline.")
                 return
             else:
-                typer.echo(
-                    "\nStatus: WARNING — Integrity violations detected!", err=True
-                )
+                typer.echo("\nStatus: WARNING — Integrity violations detected!")
                 raise typer.Exit(code=1)
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             typer.echo(f"[Error] {e}", err=True)
             raise typer.Exit(code=1)
     else:
@@ -145,7 +143,7 @@ def integrity(
             typer.echo(
                 f"\nBaseline saved successfully to {baseline_path} ({len(data)} files recorded)."
             )
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             typer.echo(f"[Error] {e}", err=True)
             raise typer.Exit(code=1)
 

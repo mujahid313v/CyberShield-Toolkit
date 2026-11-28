@@ -79,3 +79,4 @@ def test_integrity_cli(tmp_path: Path):
     )
     assert res_m.exit_code == 1
     assert "WARNING" in res_m.output
+    assert "[Error]" not in res_m.output
