@@ -1,11 +1,13 @@
 """CLI entry point for CyberShield-Toolkit."""
 
+from pathlib import Path
 from typing import Annotated
 
 import typer
 
 from cybershield import __version__
 from cybershield.caesar import caesar_brute_force, caesar_decrypt, caesar_encrypt
+from cybershield.file_integrity import save_baseline, verify_baseline
 from cybershield.password_checker import check_password_strength
 
 app = typer.Typer(
@@ -89,13 +91,63 @@ def caesar(
 @app.command()
 def integrity(
     path: Annotated[str, typer.Argument(help="File or directory path.")],
+    baseline: Annotated[
+        str, typer.Option("--baseline", "-b", help="Baseline JSON file path.")
+    ] = "baseline.json",
     verify: Annotated[
-        bool, typer.Option("--verify", help="Verify against saved baseline.")
+        bool, typer.Option("--verify", "-v", help="Verify against saved baseline.")
     ] = False,
 ) -> None:
-    """Check file integrity via SHA-256 hashes."""
-    action = "Verifying" if verify else "Hashing"
-    typer.echo(f"[file-integrity] {action}: {path}")
+    """Check file integrity via SHA-256 hashes (create or verify baseline)."""
+    target_path = Path(path)
+    baseline_path = Path(baseline)
+
+    if not target_path.exists():
+        typer.echo(f"[Error] Path not found: {target_path}", err=True)
+        raise typer.Exit(code=1)
+
+    if verify:
+        typer.echo(
+            f"[file-integrity] Verifying {target_path} against baseline {baseline_path}..."
+        )
+        try:
+            res = verify_baseline(target_path, baseline_path)
+            typer.echo("\n[Integrity Verification Results]")
+            typer.echo(f"  Baseline files: {res['total_baseline']}")
+            typer.echo(f"  Current files:  {res['total_current']}")
+            typer.echo(f"  Modified:       {len(res['modified'])}")
+            for f in res["modified"]:
+                typer.echo(f"    - {f}")
+            typer.echo(f"  New:            {len(res['new'])}")
+            for f in res["new"]:
+                typer.echo(f"    - {f}")
+            typer.echo(f"  Deleted:        {len(res['deleted'])}")
+            for f in res["deleted"]:
+                typer.echo(f"    - {f}")
+
+            if res["ok"]:
+                typer.echo("\nStatus: OK — All files match baseline.")
+                return
+            else:
+                typer.echo(
+                    "\nStatus: WARNING — Integrity violations detected!", err=True
+                )
+                raise typer.Exit(code=1)
+        except Exception as e:
+            typer.echo(f"[Error] {e}", err=True)
+            raise typer.Exit(code=1)
+    else:
+        typer.echo(
+            f"[file-integrity] Generating baseline for {target_path} -> {baseline_path}..."
+        )
+        try:
+            data = save_baseline(target_path, baseline_path)
+            typer.echo(
+                f"\nBaseline saved successfully to {baseline_path} ({len(data)} files recorded)."
+            )
+        except Exception as e:
+            typer.echo(f"[Error] {e}", err=True)
+            raise typer.Exit(code=1)
 
 
 @app.command()
